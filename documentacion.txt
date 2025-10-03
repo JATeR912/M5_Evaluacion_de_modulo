@@ -1,0 +1,44 @@
+Documentación
+
+Documenta el proceso de creación del modelo de datos y las decisiones tomadas al diseñar las tablas, restricciones y relaciones entre entidades.
+
+    El modelo utiliza tres tablas: productos, proveedores y transacciones. Cada una tiene como su clave primaria un atributo id autoincremental. Excepto por el atributo descripcion_producto todos los campos de la tablas estan definidos como NOT NULL, esto ya que son datos basicos para el funcionamiento del inventario.
+    La descripcion del producto no es obligatoria ya que no es imprecindible y los productos pueden ser diferenciados por su nombre (nombre_producto) que tiene la restriccion unique para evitar dupicados y que estos no tengan que ser diferenciados con su id o por la desccripcion.
+
+    Las relaciones entre las tablas son de uno es a muchos siendo la tabla transacciones una la tabla intermedia que las conecta, un proveedor puede tener muchas transacciones y igualmente un producto puede tener muchas transacciones.
+
+Incluye una breve explicación de la normalización aplicada en el modelo de datos y su impacto en la estructura de la base de datos.
+
+    El modelo de datos aplica principios de normalización al mantener los datos organizados en tablas separadas con información atómica (no duplicada ni repetida). Cada entidad principal (productos y proveedores) tiene su propia tabla con un identificador único, y se relacionan entre sí a través de claves foráneas presentes solo en la tabla transacciones. Esto evita la redundancia de datos, mejora la integridad de la información y facilita el mantenimiento del sistema.
+
+Presenta ejemplos de las consultas SQL utilizadas y explica cómo funcionan.
+
+    Ejemplos de consultas SQL:
+
+    1.Consulta del archivo consultas_basicas_inventario.sql
+
+    --selecciona el nombre del producto, y calcula la cantidad total vendida y el total generado por ventas
+    SELECT p.nombre_producto, SUM(t.cantidad_producto) AS cantidad_vendida, SUM(t.cantidad_producto*p.precio_producto) AS total_venta
+    --indica la tabla principal para la obtencion de datos
+    FROM productos p
+    --se une la tabla transacciones por medio del id para obtener los datos de venta por producto
+    JOIN transacciones t ON p.id_producto = t.id_producto
+    --filtra las transacciones por el tipo 'venta'
+    WHERE t.tipo_transaccion = 'venta'
+    --agrupa los resultados con el nombre del producto
+    GROUP BY p.nombre_producto;
+
+    2.Consulta del archivo consultas_complejas_inventario.sql
+
+    --selecciona los datos listados
+    SELECT p.nombre_producto, t.cantidad_producto, t.fecha_transaccion, pr.nombre_proveedor
+    --indica el lugar principal para la obtencion de datos
+    FROM transacciones t
+    --se une la tabla productos por medio del id para obtener el nombre_producto
+    JOIN productos p ON t.id_producto = p.id_producto
+    --se une la tabla proveedores por medio del id para obtener nombre_proveedor
+    JOIN proveedores pr ON t.id_proveedor = pr.id_proveedor
+    --filtra por transacciones que solo sean de tipo venta y del mes de enero del 2024
+    WHERE t.tipo_transaccion = 'venta' AND fecha_transaccion BETWEEN '2024-01-01' AND '2024-01-31'
+    --se ordenan de manera ascendente basandose en la fecha de la transaccion
+    ORDER BY t.fecha_transaccion ASC;
